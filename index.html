@@ -34,11 +34,11 @@
 <body>
   <!-- Background video and logo (use the files in same folder: Vegon1.mp4 and logovegas.jpeg) -->
   <video class="bg-video" id="bgVideo" autoplay muted loop playsinline>
-    <source src="Vegon1.mp4" type="video/mp4">
-    Seu navegador não suporta vídeo.
+    <source src="./assets/Vegon1.mp4" type="video/mp4">
+    
   </video>
 
-  <img src="logovegas.jpeg" alt="Logo Vegas" class="logo" />
+  
 
   <!-- Controls overlay -->
   <div class="controls" role="region" aria-label="Controles do agente">
@@ -53,21 +53,17 @@
         </div>
 
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
-          <button id="micToggle" class="mic-btn" title="Pressione para gravar/pausar" aria-pressed="false">🎤</button>
-          <div class="small">Pressione para ouvir (gravar)</div>
+          <button id="micToggle" class="mic-btn" title="Pressione para gravar" aria-pressed="false">🎤</button>
+          <div class="small">Pressione para gravar</div>
         </div>
       </div>
 
-      <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
-        <button id="playQuestion">▶ Ouvir pergunta</button>
-        <button id="playAnswer">🔈 Ouvir resposta</button>
-        <div id="status" class="small" style="margin-left:8px">Pronto.</div>
-      </div>
+     
     </div>
 
     <div class="panel">
       <div class="small">Resposta</div>
-      <div id="answerBox" class="answer-box">Aguardando pergunta...</div>
+      <div id="answerBox" class="answer-box"></div>
     </div>
   </div>
 
