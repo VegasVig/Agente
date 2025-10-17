@@ -1,69 +1,175 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Agente Vegas — Interface</title>
-  <style>
-    :root{--overlay-bg: rgba(0,0,0,0.45);}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;color:#fff;overflow:hidden}
-    .bg-video{position:fixed;inset:0;z-index:0;object-fit:cover;width:100%;height:100%}
-    .logo{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:3;max-height:80px;pointer-events:none}
-    .iframe-container{
-      position:relative;
-      z-index:3;
-      width:100%;
-      height:100%;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      background:var(--overlay-bg);
-      backdrop-filter:blur(4px);
-    }
-    iframe{
-      width:100%;
-      height:100%;
-      min-height:700px;
-      border:0;
-      border-radius:12px;
-      box-shadow:0 8px 30px rgba(0,0,0,0.6);
-    }
-  </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Agente Vegas — Interface</title>
+    <style>
+        :root{--overlay-bg: rgba(0,0,0,0.45);--card-bg: rgba(255,255,255,0.06)}
+        html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;color:#fff}
+        .bg-video{position:fixed;inset:0;z-index:0;object-fit:cover;width:100%;height:100%}
+        .logo{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:3;max-height:80px;pointer-events:none}
+        .controls{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:4;width:min(980px,94%);
+            display:grid;grid-template-columns:1fr 120px;gap:12px;padding:14px;border-radius:12px;
+            background:var(--overlay-bg);backdrop-filter:blur(6px);box-shadow:0 6px 20px rgba(0,0,0,0.5)}
+        .panel{background:transparent;padding:8px;display:flex;flex-direction:column;gap:8px}
+        .input-row{display:flex;gap:8px}
+        input[type="text"]{flex:1;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);
+            background:rgba(255,255,255,0.03);color:#fff;font-size:16px}
+        button{padding:10px 12px;border-radius:10px;border:0;background:#111;color:#fff;cursor:pointer;transition:background-color 0.2s}
+        button:hover{background:#333}
+        .mic-btn{display:inline-grid;place-items:center;width:52px;height:52px;border-radius:999px;
+            background:linear-gradient(180deg,#e53935,#c62828);box-shadow:0 6px 20px rgba(197,36,36,0.25)}
+        .answer-box{max-height:260px;overflow:auto;padding:12px;border-radius:8px;
+            border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.3);color:#fff}
+        .small{font-size:13px;color:rgba(255,255,255,0.7)}
+        @media (max-width:700px){.controls{grid-template-columns:1fr;gap:10px;padding:12px}}
+    </style>
 </head>
 <body>
-  <video class="bg-video" id="bgVideo" preload="auto" playsinline loop muted>
-    <source src="./assets/Vegon1.mp4" type="video/mp4">
-    Seu navegador não suporta vídeo.
-  </video>
+    <video class="bg-video" id="bgVideo" preload="auto" playsinline loop muted>
+        <source src="./assets/Vegon1.mp4" type="video/mp4">
+        Seu navegador não suporta vídeo.
+    </video>
 
-  <audio id="audioVegas" preload="auto">
-    <source src="./assets/somdovegon.mp3" type="audio/mpeg">
-    Seu navegador não suporta áudio.
-  </audio>
+    <audio id="audioVegas" preload="auto">
+        <source src="./assets/somdovegon.mp3" type="audio/mpeg">
+        Seu navegador não suporta áudio.
+    </audio>
 
-  <div class="iframe-container">
-    <iframe
-      src="https://udify.app/chatbot/eA8wKJEDf7u4UMrg"
-      frameborder="0"
-      allow="microphone">
-    </iframe>
-  </div>
+    <div class="controls">
+        <div class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                <div style="flex-grow:1;">
+                    <div class="small">Pergunta (fale ou digite)</div>
+                    <div class="input-row" style="margin-top:6px">
+                        <input id="questionInput" type="text" placeholder="Escreva sua pergunta..." />
+                        <button id="askBtn">Perguntar</button>
+                    </div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+                    <button id="micToggle" class="mic-btn" title="Pressione para gravar">🎤</button>
+                    <div class="small" id="micStatus">Pressione para gravar</div>
+                </div>
+            </div>
+            
+        </div>
 
-  <script>
-    // --- Vídeo e Som do Vegas ---
-    const bgVideo = document.getElementById('bgVideo');
-    const audioVegas = document.getElementById('audioVegas');
+        <div class="panel">
+            <div class="small">Resposta</div>
+            <div id="answerBox" class="answer-box"></div>
+        </div>
+    </div>
 
-    bgVideo.play().catch(err => console.log("Autoplay bloqueado:", err));
+    <script>
+        // 1️⃣ --- Configuração de Áudio e Vídeo ---
+        const bgVideo = document.getElementById('bgVideo');
+        const audioVegas = document.getElementById('audioVegas');
 
-    function playVegasSoundOnce() {
-      audioVegas.play().catch(err => console.warn("Falha ao tocar áudio:", err));
-      document.body.removeEventListener('click', playVegasSoundOnce);
-      document.body.removeEventListener('touchstart', playVegasSoundOnce);
-    }
+        // Garante que o vídeo silencioso inicie (para contornar restrições de autoplay)
+        bgVideo.play().catch(error => {
+             console.log("Erro ao tentar iniciar o vídeo (Autoplay):", error);
+        });
 
-    document.body.addEventListener('click', playVegasSoundOnce);
-    document.body.addEventListener('touchstart', playVegasSoundOnce);
-  </script>
+        // 💡 LÓGICA DO MP3: Tocar apenas uma vez no primeiro toque/clique da tela
+        function playVegasSoundOnce() {
+            audioVegas.play().catch(error => {
+                console.warn("Falha ao reproduzir o som do Vegas:", error);
+            });
+            
+            // Após a tentativa de reprodução, remove o listener para tocar APENAS UMA VEZ
+            document.body.removeEventListener('click', playVegasSoundOnce);
+            document.body.removeEventListener('touchstart', playVegasSoundOnce);
+            console.log("MP3 do Vegas tocado e listener removido.");
+        }
+
+        // Adiciona os listeners para o primeiro clique (desktop) ou toque (celular)
+        document.body.addEventListener('click', playVegasSoundOnce);
+        document.body.addEventListener('touchstart', playVegasSoundOnce);
+
+
+        // 2️⃣ --- Reconhecimento de voz ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const micToggle = document.getElementById('micToggle');
+        const micStatus = document.getElementById('micStatus');
+        const questionInput = document.getElementById('questionInput');
+        const askBtn = document.getElementById('askBtn');
+        const answerBox = document.getElementById('answerBox');
+
+        let recognition;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'pt-BR';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                micStatus.textContent = 'Ouvindo...';
+                micToggle.style.background = 'linear-gradient(180deg,#43a047,#2e7d32)';
+            };
+
+            recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript;
+                questionInput.value = text;
+                micStatus.textContent = 'Gravação concluída.';
+                submitQuestion(text);
+            };
+
+            recognition.onerror = (e) => {
+                console.error('Erro no microfone:', e.error);
+                micStatus.textContent = 'Erro no microfone ou permissão negada.';
+            };
+
+            recognition.onend = () => {
+                micToggle.style.background = 'linear-gradient(180deg,#e53935,#c62828)';
+            };
+
+            micToggle.onclick = () => {
+                recognition.start();
+            };
+        } else {
+            micToggle.disabled = true;
+            micStatus.textContent = 'Reconhecimento de voz não suportado.';
+        }
+
+
+        // 3️⃣ --- Lógica de Resposta e Exibição ---
+        
+        function submitQuestion(question) {
+             const q = question.trim();
+             if (!q) return;
+             answerBox.textContent = "Pensando...";
+             getAnswerAndDisplay(q);
+        }
+
+        async function getAnswer(question) {
+            // SIMULAÇÃO:
+            await new Promise(r => setTimeout(r, 1500)); 
+            return `Olá! Você perguntou: "${question}".por que voce não procura no manual`;
+            // FIM DA SIMULAÇÃO
+        }
+
+        async function getAnswerAndDisplay(q) {
+             try {
+                 const ans = await getAnswer(q);
+                 answerBox.textContent = ans;
+                 speak(ans);
+             } catch (e) {
+                 console.error(e);
+                 answerBox.textContent = "Erro ao obter resposta. Verifique o console para detalhes.";
+             }
+        }
+
+        askBtn.onclick = () => submitQuestion(questionInput.value);
+
+
+        // 4️⃣ --- Fala de resposta (TTS) ---
+        function speak(text) {
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = "pt-BR";
+            u.rate = 1;
+            window.speechSynthesis.speak(u);
+        }
+    </script>
 </body>
 </html>
