@@ -3,39 +3,120 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Agente Vegas — Interface</title>
+  <title>Agente Vegas — Vegon</title>
   <style>
-    :root{--overlay-bg: rgba(0,0,0,0.45);--card-bg: rgba(255,255,255,0.06)}
-    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;color:#fff}
-    .bg-video{position:fixed;inset:0;z-index:0;object-fit:cover;width:100%;height:100%}
-    .controls{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:4;width:min(980px,94%);
-      display:grid;grid-template-columns:1fr 120px;gap:12px;padding:14px;border-radius:12px;
-      background:var(--overlay-bg);backdrop-filter:blur(6px);box-shadow:0 6px 20px rgba(0,0,0,0.5)}
-    .panel{background:transparent;padding:8px;display:flex;flex-direction:column;gap:8px}
-    .input-row{display:flex;gap:8px}
-    input[type="text"]{flex:1;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);
-      background:rgba(255,255,255,0.03);color:#fff;font-size:16px}
-    button{padding:10px 12px;border-radius:10px;border:0;background:#111;color:#fff;cursor:pointer;transition:background-color 0.2s}
-    button:hover{background:#333}
-    .mic-btn{display:inline-grid;place-items:center;width:52px;height:52px;border-radius:999px;
-      background:linear-gradient(180deg,#e53935,#c62828);box-shadow:0 6px 20px rgba(197,36,36,0.25)}
-    .answer-box{max-height:260px;overflow:auto;padding:12px;border-radius:8px;
-      border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.3);color:#fff}
-    .small{font-size:13px;color:rgba(255,255,255,0.7)}
-    @media (max-width:700px){.controls{grid-template-columns:1fr;gap:10px;padding:12px}}
+    :root {
+      --overlay-bg: rgba(0, 0, 0, 0.45);
+      --card-bg: rgba(255, 255, 255, 0.06);
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+      color: #fff;
+      overflow: hidden;
+    }
+    .bg-video {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+    .controls {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 24px;
+      z-index: 4;
+      width: min(720px, 94%);
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 12px;
+      background: var(--overlay-bg);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    }
+    .panel {
+      background: transparent;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.03);
+      color: #fff;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 0;
+      background: #111;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background: #333;
+    }
+    .mic-btn {
+      display: inline-grid;
+      place-items: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #e53935, #c62828);
+      box-shadow: 0 6px 20px rgba(197,36,36,0.25);
+    }
+    .answer-box {
+      max-height: 220px;
+      overflow: auto;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+    }
+    .small {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+    }
+    @media (max-width:700px) {
+      .controls {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 12px;
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- 🔹 Vídeo de fundo -->
   <video class="bg-video" id="bgVideo" preload="auto" playsinline loop muted>
     <source src="./assets/Vegon1.mp4" type="video/mp4">
     Seu navegador não suporta vídeo.
   </video>
 
+  <!-- 🔹 Áudio de introdução -->
   <audio id="audioVegas" preload="auto">
     <source src="./assets/somdovegon.mp3" type="audio/mpeg">
     Seu navegador não suporta áudio.
   </audio>
 
+  <!-- 🔹 Painel principal -->
   <div class="controls">
     <div class="panel">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
@@ -63,15 +144,17 @@
     // --- ÁUDIO / VÍDEO ---
     const bgVideo = document.getElementById('bgVideo');
     const audioVegas = document.getElementById('audioVegas');
-    bgVideo.play().catch(e => console.log("Autoplay bloqueado:", e));
 
+    // Ativa o áudio ao primeiro toque na tela
     function playVegasSoundOnce() {
-      audioVegas.play().catch(e => console.warn("Erro som:", e));
+      audioVegas.play().catch(e => console.warn("Erro ao tocar som:", e));
       document.body.removeEventListener('click', playVegasSoundOnce);
       document.body.removeEventListener('touchstart', playVegasSoundOnce);
     }
     document.body.addEventListener('click', playVegasSoundOnce);
     document.body.addEventListener('touchstart', playVegasSoundOnce);
+
+    bgVideo.play().catch(e => console.log("Autoplay bloqueado:", e));
 
     // --- RECONHECIMENTO DE VOZ ---
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -120,7 +203,7 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer app-5JOohTvpRC6sdAInfunigQOC"  // substitua pela sua chave
+          "Authorization": "Bearer app-5JOohTvpRC6sdAInfunigQOC" // 🔑 sua chave aqui
         },
         body: JSON.stringify({
           inputs: {},
@@ -154,41 +237,47 @@
 
     askBtn.onclick = () => submitQuestion(questionInput.value);
 
-    // --- TTS (resposta falada) ---
+    // --- TTS (voz masculina) ---
+    let selectedVoice = null;
+
+    function loadVoices() {
+      const voices = window.speechSynthesis.getVoices();
+      if (!voices.length) {
+        setTimeout(loadVoices, 500);
+        return;
+      }
+
+      selectedVoice = voices.find(v =>
+        v.lang.startsWith("pt") &&
+        (v.name.toLowerCase().includes("will") ||
+         v.name.toLowerCase().includes("ricardo") ||
+         v.name.toLowerCase().includes("daniel") ||
+         v.name.toLowerCase().includes("male") ||
+         v.name.toLowerCase().includes("brasil"))
+      );
+
+      console.log("🔊 Voz selecionada:", selectedVoice ? selectedVoice.name : "Padrão");
+    }
+
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+
     function speak(text) {
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "pt-BR";
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "pt-BR";
+      u.rate = 1.0;
+      u.pitch = 0.85;
 
-  // 🔹 tenta escolher uma voz masculina disponível no sistema
-  const voices = window.speechSynthesis.getVoices();
-  const maleVoice = voices.find(v =>
-    v.lang.startsWith("pt") && 
-    (v.name.toLowerCase().includes("male") || 
-     v.name.toLowerCase().includes("brasil") ||
-     v.name.toLowerCase().includes("ricardo") || 
-     v.name.toLowerCase().includes("daniel"))
-  );
+      if (selectedVoice) u.voice = selectedVoice;
+      window.speechSynthesis.speak(u);
+    }
 
-  if (maleVoice) {
-    u.voice = maleVoice;
-  } else {
-    console.warn("Voz masculina não encontrada. Usando padrão.");
-  }
-
-  // 🔹 ajusta o tom e a velocidade para soar mais natural
-  u.rate = 1.0;  // velocidade
-  u.pitch = 0.9; // tom ligeiramente mais grave
-  window.speechSynthesis.speak(u);
-}
-
-// ⚠️ Em alguns navegadores, as vozes carregam depois da página.
-// Para garantir que funcione:
-window.speechSynthesis.onvoiceschanged = () => {
-  console.log("Vozes carregadas:", window.speechSynthesis.getVoices());
-};
-
-    
+    // --- Mensagem inicial do Vegon ---
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        speak("Olá, eu sou o Vegon, assistente virtual da Vegas Vigilância. Estou pronto para ajudar você!");
+      }, 2000);
+    });
   </script>
 </body>
 </html>
-
