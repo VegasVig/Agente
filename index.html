@@ -157,7 +157,7 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer app-BD4wsEvAhnjyg2qQ1cGoyUJS"
+          "Authorization": "Bearer app-nyz9LEtNHRzsugzCRS67Dj2h"
         },
         body: JSON.stringify({
           inputs: {},
@@ -186,45 +186,45 @@
     askBtn.onclick = () => submitQuestion(questionInput.value);
 
     // --- VOZ MASCULINA ---
-    let selectedVoice = null;
+   let selectedVoice = null;
 
-    function pickMaleVoice() {
-      const voices = window.speechSynthesis.getVoices();
-      if (!voices.length) {
-        setTimeout(pickMaleVoice, 300);
-        return;
-      }
+function pickMaleVoice() {
+  const voices = window.speechSynthesis.getVoices();
 
-      selectedVoice = voices.find(v =>
-        v.lang.startsWith("pt") && (
-          v.name.toLowerCase().includes("will") ||
-          v.name.toLowerCase().includes("ricardo") ||
-          v.name.toLowerCase().includes("daniel") ||
-          v.name.toLowerCase().includes("male") ||
-          v.name.toLowerCase().includes("brasil") ||
-          v.name.toLowerCase().includes("pt")
-        )
-      );
+  if (!voices.length) {
+    setTimeout(pickMaleVoice, 300);
+    return;
+  }
 
-      console.log("🎙️ Voz selecionada:", selectedVoice ? selectedVoice.name : "Padrão");
-    }
+  // Nomes reais de vozes masculinas nos navegadores
+  const maleKeywords = ["Ricardo", "Daniel", "Henrique", "Thiago", "João", "Male", "Will"];
 
-    window.speechSynthesis.onvoiceschanged = pickMaleVoice;
-    pickMaleVoice();
+  selectedVoice = voices.find(v =>
+    v.lang.startsWith("pt") &&
+    maleKeywords.some(m => v.name.toLowerCase().includes(m.toLowerCase()))
+  );
 
-    function speak(text) {
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = "pt-BR";
-      u.rate = 1.0;
-      u.pitch = 0.7; // mais grave
-      if (selectedVoice) u.voice = selectedVoice;
-      window.speechSynthesis.speak(u);
-    }
+  // Se não encontrar, tenta pegar qualquer pt-BR como fallback
+  if (!selectedVoice) {
+    selectedVoice = voices.find(v => v.lang.startsWith("pt"));
+  }
 
-    // Mensagem inicial com voz masculina
-    document.body.addEventListener("click", () => {
-      speak("Olá, eu sou o Vegon, assistente virtual da Vegas Vigilância. Estou pronto para ajudar você!");
-    }, { once: true });
-  </script>
-</body>
-</html>
+  console.log("🎙️ Voz selecionada:", selectedVoice ? selectedVoice.name : "Nenhuma voz masculina encontrada");
+}
+
+window.speechSynthesis.onvoiceschanged = pickMaleVoice;
+pickMaleVoice();
+
+function speak(text) {
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "pt-BR";
+  u.rate = 1.0;
+  u.pitch = 0.7; // mais grave
+  if (selectedVoice) u.voice = selectedVoice;
+  window.speechSynthesis.speak(u);
+}
+
+// Fala inicial
+document.body.addEventListener("click", () => {
+  speak("Olá instalador, sou o Vegon. Como posso te ajudar?");
+}, { once: true });
