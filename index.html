@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Agente Vegas Vegon</title>
 
   <style>
-    html,
-    body {
+    html, body {
       height: 100%;
       margin: 0;
       font-family: Inter, system-ui, Arial;
@@ -25,228 +23,186 @@
       height: 100%;
     }
 
-    /* PAINEL */
     .controls {
       position: fixed;
       left: 50%;
       transform: translateX(-50%);
       bottom: 20px;
       z-index: 4;
-      width: min(600px, 94%);
-      display: flex;
-      gap: 12px;
-      padding: 14px;
+      width: min(400px, 95%);
+      display: grid;
+      grid-template-columns: 1fr 70px;
+      gap: 8px;
+      padding: 10px;
       border-radius: 12px;
-      background: rgba(0, 0, 0, 0.55);
+      background: rgba(0,0,0,0.55);
       backdrop-filter: blur(6px);
-      align-items: center;
     }
 
     .panel {
-      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
 
-    /* Input menor */
     input[type="text"] {
-      width: 100%;
-      padding: 9px 10px;
+      width: 90%;
+      padding: 10px;
       border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
       color: #fff;
       font-size: 15px;
     }
 
     button {
-      padding: 10px;
+      padding: 8px;
       border-radius: 8px;
       border: 0;
       background: #111;
       color: #fff;
       cursor: pointer;
-      transition: 0.2s;
-    }
-
-    button:hover {
-      background: #333;
-    }
-
-    /* MICROFONE */
-    .mic-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
     }
 
     .mic-btn {
-      display: inline-grid;
-      place-items: center;
-      width: 55px;
-      height: 55px;
-      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      border-radius: 999px;
       background: linear-gradient(180deg, #e53935, #b71c1c);
-      font-size: 26px;
-      box-shadow: 0 4px 12px rgba(200, 30, 30, 0.4);
-      border: none;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
     }
 
     .answer-box {
-      max-height: 200px;
+      max-height: 140px;
       overflow: auto;
-      padding: 10px;
+      padding: 8px;
       border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(0, 0, 0, 0.3);
-      font-size: 15px;
+      background: rgba(0,0,0,0.3);
+      font-size: 14px;
     }
 
     .small {
-      font-size: 12px;
+      font-size: 13px;
       opacity: 0.8;
-    }
-
-    /* ✅ MOBILE */
-    @media (max-width: 600px) {
-      .controls {
-        flex-direction: column;
-        bottom: 15px;
-        width: 94%;
-      }
-
-      .mic-btn {
-        width: 75px;
-        height: 75px;
-        font-size: 33px;
-      }
-
-      .answer-box {
-        max-height: 180px;
-        font-size: 14px;
-      }
     }
   </style>
 </head>
-
 <body>
 
+  <!-- Fundo -->
   <video class="bg-video" id="bgVideo" preload="auto" playsinline loop muted>
     <source src="./assets/Vegon1.mp4" type="video/mp4">
   </video>
 
+  <!-- Som inicial -->
   <audio id="audioVegas" preload="auto">
     <source src="./assets/somdovegon.mp3" type="audio/mpeg">
   </audio>
 
+  <!-- Painel -->
   <div class="controls">
     <div class="panel">
-      <div class="small">Pergunta (fale ou digite)</div>
-      <div style="display:flex; gap:8px;">
-        <input id="questionInput" type="text" placeholder="Escreva sua pergunta..." />
-        <button id="askBtn">Enviar</button>
+      <div class="small">Pergunte ao Vegon 👇</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input id="questionInput" type="text" placeholder="Fale ou digite..." />
+        <button id="askBtn">▶</button>
       </div>
-
-      <div class="small">Resposta</div>
+      <div class="small">Resposta:</div>
       <div id="answerBox" class="answer-box"></div>
     </div>
 
-    <div class="mic-area">
+    <div style="display:flex;flex-direction:column;align-items:center;">
       <button id="micToggle" class="mic-btn">🎤</button>
-      <div class="small" id="micStatus">Falar</div>
+      <small id="micStatus" class="small">Falar</small>
     </div>
   </div>
 
-  <script>
-    const bgVideo = document.getElementById('bgVideo');
-    const audioVegas = document.getElementById('audioVegas');
-    const micToggle = document.getElementById('micToggle');
-    const micStatus = document.getElementById('micStatus');
-    const questionInput = document.getElementById('questionInput');
-    const askBtn = document.getElementById('askBtn');
-    const answerBox = document.getElementById('answerBox');
+<script>
+const micToggle = document.getElementById("micToggle");
+const micStatus = document.getElementById("micStatus");
+const questionInput = document.getElementById("questionInput");
+const askBtn = document.getElementById("askBtn");
+const answerBox = document.getElementById("answerBox");
 
-    document.body.addEventListener('click', () => {
-      audioVegas.play().catch(() => { });
-    }, { once: true });
+// Inicializa o vídeo
+document.getElementById("bgVideo").play().catch(()=>{});
 
-    bgVideo.play().catch(() => { });
+// ✅ Som de clique para ativar áudio no iPhone
+document.body.addEventListener("click", () => {
+  document.getElementById("audioVegas").play().catch(()=>{});
+}, { once:true });
 
-    // 🎤 RECONHECIMENTO DE VOZ
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition;
+// 🎤 Reconhecimento de voz
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition) {
+  const rec = new SpeechRecognition();
+  rec.lang = "pt-BR";
+  rec.onresult = e => {
+    const text = e.results[0][0].transcript;
+    questionInput.value = text;
+    submit(text);
+  };
+  micToggle.onclick = () => rec.start();
+  rec.onstart = ()=> micStatus.textContent = "Ouvindo...";
+  rec.onend = ()=> micStatus.textContent = "Falar";
+}
 
-    if (SpeechRecognition) {
-      recognition = new SpeechRecognition();
-      recognition.lang = 'pt-BR';
-      recognition.onresult = e => {
-        const text = e.results[0][0].transcript;
-        questionInput.value = text;
-        submitQuestion(text);
-      };
-      recognition.onstart = () => micStatus.textContent = 'Ouvindo...';
-      recognition.onend = () => micStatus.textContent = 'Falar';
-      micToggle.onclick = () => recognition.start();
-    } else {
-      micToggle.disabled = true;
-      micStatus.textContent = 'Sem suporte.';
-    }
+// ✅ Chamada correta ao Dify
+async function getAnswer(q) {
+  const r = await fetch("https://api.dify.ai/v1/chat-messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer app-nyz9LEtNHRzsugzCRS67Dj2h"
+    },
+    body: JSON.stringify({
+      query: q,
+      inputs: {},
+      response_mode: "blocking",
+      user: "vegon-user"
+    })
+  });
 
-    // 🔗 DIFY
-    async function getAnswer(q) {
-      const r = await fetch("https://api.dify.ai/v1/chat-messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer app-nyz9LEtNHRzsugzCRS67Dj2h"
-        },
-        body: JSON.stringify({ query: q, response_mode: "blocking", user: "vegon" })
-      });
-      const data = await r.json();
-      return data.answer || "Erro ao responder.";
-    }
+  const data = await r.json();
+  return data.answer || "⚠ Não consegui responder.";
+}
 
-    async function submitQuestion(q) {
-      if (!q.trim()) return;
-      answerBox.textContent = "Pensando...";
-      const ans = await getAnswer(q);
-      answerBox.textContent = ans;
-      speak(ans);
-    }
+// 📩 Enviar pergunta
+async function submit(text) {
+  if (!text.trim()) return;
+  answerBox.textContent = "Pensando...";
+  const ans = await getAnswer(text);
+  answerBox.textContent = ans;
+  speak(ans);
+}
 
-    askBtn.onclick = () => submitQuestion(questionInput.value);
+askBtn.onclick = () => submit(questionInput.value);
 
-    // 🔊 VOZ MASCULINA
-    let selectedVoice = null;
+// 🧔 Voz masculina
+let selectedVoice = null;
+function pickVoice() {
+  const voices = speechSynthesis.getVoices();
+  selectedVoice = voices.find(v => v.lang.includes("pt") && (
+    v.name.includes("Ricardo") || v.name.includes("Daniel") || v.name.includes("Male")
+  )) || voices[0];
+}
+speechSynthesis.onvoiceschanged = pickVoice; pickVoice();
 
-    function pickMaleVoice() {
-      const voices = speechSynthesis.getVoices();
-      selectedVoice = voices.find(v =>
-        v.lang.includes("pt") &&
-        (v.name.includes("Google português do Brasil") ||
-          v.name.toLowerCase().includes("ricardo") ||
-          v.name.toLowerCase().includes("daniel") ||
-          v.name.toLowerCase().includes("will") ||
-          v.name.toLowerCase().includes("male") ||
-          v.name.toLowerCase().includes("br"))
-      );
-    }
-    speechSynthesis.onvoiceschanged = pickMaleVoice;
-    pickMaleVoice();
+function speak(text) {
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "pt-BR";
+  u.pitch = 0.7;
+  if (selectedVoice) u.voice = selectedVoice;
+  speechSynthesis.speak(u);
+}
 
-    function speak(text) {
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = "pt-BR";
-      u.pitch = 0.7;
-      if (selectedVoice) u.voice = selectedVoice;
-      speechSynthesis.speak(u);
-    }
+// 🎬 Mensagem de boas-vindas
+document.body.addEventListener("click",()=>{
+  speak("Olá instalador, eu sou o Vegon. Como posso te ajudar hoje?");
+},{once:true});
+</script>
 
-    // mensagem inicial
-    document.body.addEventListener("click", () => speak("Olá instalador, eu sou o Vegon. Como posso te ajudar?"), { once: true });
-  </script>
 </body>
-
 </html>
