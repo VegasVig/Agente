@@ -176,7 +176,8 @@
         const r = await fetch("https://andrecruzac.app.n8n.cloud/webhook/0ddcfc67-a752-488b-b5e1-d1d5d3f51349", { // ⬅️ Substitua por sua URL correta
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question: q })
+        body: JSON.stringify({ chatInput: q })
+
         });
 
         const data = await r.json();
