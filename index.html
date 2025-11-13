@@ -73,12 +73,18 @@
       display: grid;
       place-items: center;
       font-size: 22px;
-      transition: background 0.2s, box-shadow 0.2s;
+      transition: all 0.25s;
     }
 
     .mic-btn.active {
       background: linear-gradient(180deg, #00e676, #00c853);
-      box-shadow: 0 0 12px 3px rgba(0, 230, 118, 0.6);
+      box-shadow: 0 0 18px 5px rgba(0, 230, 118, 0.8);
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
     }
 
     .answer-box {
@@ -98,17 +104,14 @@
 </head>
 <body>
 
-  <!-- Fundo -->
   <video class="bg-video" id="bgVideo" preload="auto" playsinline loop muted>
     <source src="./assets/Vegon1.mp4" type="video/mp4">
   </video>
 
-  <!-- Som inicial -->
   <audio id="audioVegas" preload="auto">
     <source src="./assets/somdovegon.mp3" type="audio/mpeg">
   </audio>
 
-  <!-- Painel -->
   <div class="controls">
     <div class="panel">
       <div class="small">Pergunte ao Vegon 👇</div>
@@ -133,10 +136,7 @@ const questionInput = document.getElementById("questionInput");
 const askBtn = document.getElementById("askBtn");
 const answerBox = document.getElementById("answerBox");
 
-// Inicializa o vídeo
 document.getElementById("bgVideo").play().catch(()=>{});
-
-// ✅ Som inicial (ativa áudio no iPhone)
 document.body.addEventListener("click", () => {
   document.getElementById("audioVegas").play().catch(()=>{});
 }, { once:true });
@@ -160,26 +160,26 @@ if (SpeechRecognition) {
     micToggle.classList.remove("active");
   };
   micToggle.onclick = () => rec.start();
-} else {
-  micToggle.disabled = true;
-  micStatus.textContent = "Sem microfone";
 }
 
-// ✅ Chamada ao agente do n8n
+// ✅ Chamada ao seu agente n8n
 async function getAnswer(q) {
-  const r = await fetch("https://andrecruzac.app.n8n.cloud/chat/ikZQYjixrxmxhSZnf", { // ← substitua pela URL do seu Chat Trigger
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ message: q })
-  });
+  try {
+    const r = await fetch("https://andrecruzac.app.n8n.cloud/webhook/c66b2727-b5ab-4fd6-8943-19fbbd938959/chat", { // ⬅️ Substitua por sua URL correta
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: q })
+    });
 
-  const data = await r.json();
-  return data.output || data.answer || "⚠ Não consegui responder.";
+    const data = await r.json();
+    console.log("🔹Resposta do n8n:", data);
+    return data.answer || data.output || data.text || "⚠ Não consegui entender.";
+  } catch (err) {
+    console.error(err);
+    return "❌ Erro ao conectar com o agente.";
+  }
 }
 
-// 📩 Enviar pergunta
 async function submit(text) {
   if (!text.trim()) return;
   answerBox.textContent = "Pensando...";
@@ -190,12 +190,11 @@ async function submit(text) {
 
 askBtn.onclick = () => submit(questionInput.value);
 
-// 🧔 Forçar voz masculina (pt-BR)
+// 🧔 Voz masculina
 let selectedVoice = null;
 
 function pickVoice() {
   const voices = speechSynthesis.getVoices();
-
   selectedVoice =
     voices.find(v => v.lang === "pt-BR" && v.name.includes("Ricardo")) ||
     voices.find(v => v.lang === "pt-BR" && v.name.includes("Daniel")) ||
@@ -220,3 +219,4 @@ function speak(text) {
 
 </body>
 </html>
+
