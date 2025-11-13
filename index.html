@@ -1,222 +1,177 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Agente Vegas Vegon</title>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agente Vegas AI</title>
   <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: Inter, system-ui, Arial;
+    body {
+      font-family: Arial, sans-serif;
+      background: #0b0c10;
       color: #fff;
-      overflow: hidden;
-    }
-
-    .bg-video {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      object-fit: cover;
-      width: 100%;
-      height: 100%;
-    }
-
-    .controls {
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20px;
-      z-index: 4;
-      width: min(400px, 95%);
-      display: grid;
-      grid-template-columns: 1fr 70px;
-      gap: 8px;
-      padding: 10px;
-      border-radius: 12px;
-      background: rgba(0,0,0,0.55);
-      backdrop-filter: blur(6px);
-    }
-
-    .panel {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
 
-    input[type="text"] {
-      width: 90%;
+    #chat {
+      width: 400px;
+      background: #1f2833;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    }
+
+    #messages {
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      background: #0b0c10;
+      border-radius: 10px;
       padding: 10px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.05);
-      color: #fff;
-      font-size: 15px;
     }
 
-    button {
-      padding: 8px;
-      border-radius: 8px;
-      border: 0;
-      background: #111;
-      color: #fff;
-      cursor: pointer;
-      transition: background 0.2s;
+    .message {
+      margin: 5px 0;
     }
 
-    .mic-btn {
+    .user {
+      color: #66fcf1;
+      text-align: right;
+    }
+
+    .bot {
+      color: #45a29e;
+    }
+
+    #mic {
       width: 50px;
       height: 50px;
-      border-radius: 999px;
-      background: linear-gradient(180deg, #e53935, #b71c1c);
-      display: grid;
-      place-items: center;
-      font-size: 22px;
-      transition: all 0.25s;
+      border-radius: 50%;
+      background: #45a29e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin: 10px auto;
+      transition: 0.3s;
     }
 
-    .mic-btn.active {
-      background: linear-gradient(180deg, #00e676, #00c853);
-      box-shadow: 0 0 18px 5px rgba(0, 230, 118, 0.8);
-      animation: pulse 1s infinite alternate;
+    #mic.active {
+      background: #00ff00;
+      box-shadow: 0 0 20px #00ff00;
+      animation: pulse 1s infinite;
     }
 
     @keyframes pulse {
       0% { transform: scale(1); }
-      100% { transform: scale(1.1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
     }
 
-    .answer-box {
-      max-height: 140px;
-      overflow: auto;
-      padding: 8px;
-      border-radius: 8px;
-      background: rgba(0,0,0,0.3);
-      font-size: 14px;
+    #input {
+      width: calc(100% - 60px);
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      background: #0b0c10;
+      color: #fff;
     }
 
-    .small {
-      font-size: 13px;
-      opacity: 0.8;
+    #send {
+      padding: 10px;
+      background: #66fcf1;
+      color: #0b0c10;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-
-  <video class="bg-video" id="bgVideo" preload="auto" playsinline loop muted>
-    <source src="./assets/Vegon1.mp4" type="video/mp4">
-  </video>
-
-  <audio id="audioVegas" preload="auto">
-    <source src="./assets/somdovegon.mp3" type="audio/mpeg">
-  </audio>
-
-  <div class="controls">
-    <div class="panel">
-      <div class="small">Pergunte ao Vegon 👇</div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <input id="questionInput" type="text" placeholder="Fale ou digite..." />
-        <button id="askBtn">▶</button>
-      </div>
-      <div class="small">Resposta:</div>
-      <div id="answerBox" class="answer-box"></div>
+  <div id="chat">
+    <div id="messages"></div>
+    <div style="display: flex;">
+      <input id="input" placeholder="Fale ou digite sua mensagem..." />
+      <button id="send">Enviar</button>
     </div>
-
-    <div style="display:flex;flex-direction:column;align-items:center;">
-      <button id="micToggle" class="mic-btn">🎤</button>
-      <small id="micStatus" class="small">Falar</small>
-    </div>
+    <div id="mic">🎤</div>
   </div>
 
-<script>
-const micToggle = document.getElementById("micToggle");
-const micStatus = document.getElementById("micStatus");
-const questionInput = document.getElementById("questionInput");
-const askBtn = document.getElementById("askBtn");
-const answerBox = document.getElementById("answerBox");
+  <script>
+    const messages = document.getElementById("messages");
+    const input = document.getElementById("input");
+    const sendBtn = document.getElementById("send");
+    const mic = document.getElementById("mic");
 
-document.getElementById("bgVideo").play().catch(()=>{});
-document.body.addEventListener("click", () => {
-  document.getElementById("audioVegas").play().catch(()=>{});
-}, { once:true });
+    // 👉 Substitua pelo SEU webhook URL público
+    const CHAT_URL = "https://andrecruzac.app.n8n.cloud/webhook/c66b2727-b5ab-4fd6-8943-19fbbd938959/chat";
 
-// 🎤 Reconhecimento de voz
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (SpeechRecognition) {
-  const rec = new SpeechRecognition();
-  rec.lang = "pt-BR";
-  rec.onresult = e => {
-    const text = e.results[0][0].transcript;
-    questionInput.value = text;
-    submit(text);
-  };
-  rec.onstart = () => {
-    micStatus.textContent = "Ouvindo...";
-    micToggle.classList.add("active");
-  };
-  rec.onend = () => {
-    micStatus.textContent = "Falar";
-    micToggle.classList.remove("active");
-  };
-  micToggle.onclick = () => rec.start();
-}
+    function addMessage(text, sender) {
+      const div = document.createElement("div");
+      div.classList.add("message", sender);
+      div.textContent = text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
 
-// ✅ Chamada ao seu agente n8n
-async function getAnswer(q) {
-  try {
-    const r = await fetch("https://andrecruzac.app.n8n.cloud/webhook/c66b2727-b5ab-4fd6-8943-19fbbd938959/chat", { // ⬅️ Substitua por sua URL correta
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: q })
-    });
+    async function sendMessage(text) {
+      addMessage(text, "user");
+      const res = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatInput: text }),
+      });
+      const data = await res.json();
+      const reply = data.output || "Sem resposta";
+      addMessage(reply, "bot");
+      speak(reply); // fala a resposta com voz masculina
+    }
 
-    const data = await r.json();
-    console.log("🔹Resposta do n8n:", data);
-    return data.answer || data.output || data.text || "⚠ Não consegui entender.";
-  } catch (err) {
-    console.error(err);
-    return "❌ Erro ao conectar com o agente.";
-  }
-}
+    sendBtn.onclick = () => {
+      const text = input.value.trim();
+      if (text) sendMessage(text);
+      input.value = "";
+    };
 
-async function submit(text) {
-  if (!text.trim()) return;
-  answerBox.textContent = "Pensando...";
-  const ans = await getAnswer(text);
-  answerBox.textContent = ans;
-  speak(ans);
-}
+    // 🎙️ Reconhecimento de voz + microfone verde
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "pt-BR";
 
-askBtn.onclick = () => submit(questionInput.value);
+    mic.onclick = () => {
+      if (mic.classList.contains("active")) {
+        recognition.stop();
+        mic.classList.remove("active");
+      } else {
+        recognition.start();
+        mic.classList.add("active");
+      }
+    };
 
-// 🧔 Voz masculina
-let selectedVoice = null;
+    recognition.onresult = (event) => {
+      const text = event.results[0][0].transcript;
+      sendMessage(text);
+    };
 
-function pickVoice() {
-  const voices = speechSynthesis.getVoices();
-  selectedVoice =
-    voices.find(v => v.lang === "pt-BR" && v.name.includes("Ricardo")) ||
-    voices.find(v => v.lang === "pt-BR" && v.name.includes("Daniel")) ||
-    voices.find(v => v.lang === "pt-BR" && v.name.toLowerCase().includes("male")) ||
-    voices.find(v => v.lang === "pt-BR") ||
-    voices.find(v => v.lang.includes("pt")) ||
-    voices[0];
-}
+    recognition.onend = () => mic.classList.remove("active");
 
-speechSynthesis.onvoiceschanged = pickVoice;
-pickVoice();
+    // 🔊 Voz masculina com SpeechSynthesis
+    function speak(text) {
+      const utter = new SpeechSynthesisUtterance(text);
+      const voices = window.speechSynthesis.getVoices();
+      utter.lang = "pt-BR";
+      utter.pitch = 1.0;
+      utter.rate = 1;
+      utter.volume = 1;
+      const maleVoice = voices.find(v => v.name.toLowerCase().includes("ricardo") || v.name.toLowerCase().includes("male"));
+      if (maleVoice) utter.voice = maleVoice;
+      window.speechSynthesis.speak(utter);
+    }
 
-function speak(text) {
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "pt-BR";
-  u.pitch = 0.8;
-  u.rate = 1;
-  if (selectedVoice) u.voice = selectedVoice;
-  speechSynthesis.speak(u);
-}
-</script>
-
+    window.speechSynthesis.onvoiceschanged = () => speak("");
+  </script>
 </body>
 </html>
-
