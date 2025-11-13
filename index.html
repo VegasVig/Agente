@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Agente Vegas Vegon</title>
 
   <style>
-    html, body {
+    html,
+    body {
       height: 100%;
       margin: 0;
       font-family: Inter, system-ui, Arial;
@@ -35,7 +37,7 @@
       gap: 8px;
       padding: 10px;
       border-radius: 12px;
-      background: rgba(0,0,0,0.55);
+      background: rgba(0, 0, 0, 0.55);
       backdrop-filter: blur(6px);
     }
 
@@ -49,8 +51,8 @@
       width: 90%;
       padding: 10px;
       border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.05);
       color: #fff;
       font-size: 15px;
     }
@@ -83,8 +85,13 @@
     }
 
     @keyframes pulse {
-      0% { transform: scale(1); }
-      100% { transform: scale(1.1); }
+      0% {
+        transform: scale(1);
+      }
+
+      100% {
+        transform: scale(1.1);
+      }
     }
 
     .answer-box {
@@ -92,7 +99,7 @@
       overflow: auto;
       padding: 8px;
       border-radius: 8px;
-      background: rgba(0,0,0,0.3);
+      background: rgba(0, 0, 0, 0.3);
       font-size: 14px;
     }
 
@@ -102,6 +109,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <video class="bg-video" id="bgVideo" preload="auto" playsinline loop muted>
@@ -129,94 +137,94 @@
     </div>
   </div>
 
-<script>
-const micToggle = document.getElementById("micToggle");
-const micStatus = document.getElementById("micStatus");
-const questionInput = document.getElementById("questionInput");
-const askBtn = document.getElementById("askBtn");
-const answerBox = document.getElementById("answerBox");
+  <script>
+    const micToggle = document.getElementById("micToggle");
+    const micStatus = document.getElementById("micStatus");
+    const questionInput = document.getElementById("questionInput");
+    const askBtn = document.getElementById("askBtn");
+    const answerBox = document.getElementById("answerBox");
 
-document.getElementById("bgVideo").play().catch(()=>{});
-document.body.addEventListener("click", () => {
-  document.getElementById("audioVegas").play().catch(()=>{});
-}, { once:true });
+    document.getElementById("bgVideo").play().catch(() => { });
+    document.body.addEventListener("click", () => {
+      document.getElementById("audioVegas").play().catch(() => { });
+    }, { once: true });
 
-// 🎤 Reconhecimento de voz
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (SpeechRecognition) {
-  const rec = new SpeechRecognition();
-  rec.lang = "pt-BR";
-  rec.onresult = e => {
-    const text = e.results[0][0].transcript;
-    questionInput.value = text;
-    submit(text);
-  };
-  rec.onstart = () => {
-    micStatus.textContent = "Ouvindo...";
-    micToggle.classList.add("active");
-  };
-  rec.onend = () => {
-    micStatus.textContent = "Falar";
-    micToggle.classList.remove("active");
-  };
-  micToggle.onclick = () => rec.start();
-}
+    // 🎤 Reconhecimento de voz
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const rec = new SpeechRecognition();
+      rec.lang = "pt-BR";
+      rec.onresult = e => {
+        const text = e.results[0][0].transcript;
+        questionInput.value = text;
+        submit(text);
+      };
+      rec.onstart = () => {
+        micStatus.textContent = "Ouvindo...";
+        micToggle.classList.add("active");
+      };
+      rec.onend = () => {
+        micStatus.textContent = "Falar";
+        micToggle.classList.remove("active");
+      };
+      micToggle.onclick = () => rec.start();
+    }
 
-// ✅ Chamada ao seu agente n8n
-async function getAnswer(q) {
-  try {
-    const r = await fetch("https://andrecruzac.app.n8n.cloud/webhook/0ddcfc67-a752-488b-b5e1-d1d5d3f51349", { // ⬅️ Substitua por sua URL correta
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: q })
-    });
+    // ✅ Chamada ao seu agente n8n
+    async function getAnswer(q) {
+      try {
+        const r = await fetch("https://andrecruzac.app.n8n.cloud/webhook/0ddcfc67-a752-488b-b5e1-d1d5d3f51349", { // ⬅️ Substitua por sua URL correta
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question: q })
+        });
 
-    const data = await r.json();
-    console.log("🔹Resposta do n8n:", data);
-    return data.answer || data.output || data.text || "⚠ Não consegui entender.";
-  } catch (err) {
-    console.error(err);
-    return "❌ Erro ao conectar com o agente.";
-  }
-}
+        const data = await r.json();
+        console.log("🔹Resposta do n8n:", data);
+        return data.answer || data.output || data.text || data.mensagem || "⚠ Não consegui entender.";
+      } catch (err) {
+        console.error(err);
+        return "❌ Erro ao conectar com o agente.";
+      }
+    }
 
-async function submit(text) {
-  if (!text.trim()) return;
-  answerBox.textContent = "Pensando...";
-  const ans = await getAnswer(text);
-  answerBox.textContent = ans;
-  speak(ans);
-}
+    async function submit(text) {
+      if (!text.trim()) return;
+      answerBox.textContent = "Pensando...";
+      const ans = await getAnswer(text);
+      answerBox.textContent = ans;
+      speak(ans);
+    }
 
-askBtn.onclick = () => submit(questionInput.value);
+    askBtn.onclick = () => submit(questionInput.value);
 
-// 🧔 Voz masculina
-let selectedVoice = null;
+    // 🧔 Voz masculina
+    let selectedVoice = null;
 
-function pickVoice() {
-  const voices = speechSynthesis.getVoices();
-  selectedVoice =
-    voices.find(v => v.lang === "pt-BR" && v.name.includes("Ricardo")) ||
-    voices.find(v => v.lang === "pt-BR" && v.name.includes("Daniel")) ||
-    voices.find(v => v.lang === "pt-BR" && v.name.toLowerCase().includes("male")) ||
-    voices.find(v => v.lang === "pt-BR") ||
-    voices.find(v => v.lang.includes("pt")) ||
-    voices[0];
-}
+    function pickVoice() {
+      const voices = speechSynthesis.getVoices();
+      selectedVoice =
+        voices.find(v => v.lang === "pt-BR" && v.name.includes("Ricardo")) ||
+        voices.find(v => v.lang === "pt-BR" && v.name.includes("Daniel")) ||
+        voices.find(v => v.lang === "pt-BR" && v.name.toLowerCase().includes("male")) ||
+        voices.find(v => v.lang === "pt-BR") ||
+        voices.find(v => v.lang.includes("pt")) ||
+        voices[0];
+    }
 
-speechSynthesis.onvoiceschanged = pickVoice;
-pickVoice();
+    speechSynthesis.onvoiceschanged = pickVoice;
+    pickVoice();
 
-function speak(text) {
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "pt-BR";
-  u.pitch = 0.8;
-  u.rate = 1;
-  if (selectedVoice) u.voice = selectedVoice;
-  speechSynthesis.speak(u);
-}
-</script>
+    function speak(text) {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "pt-BR";
+      u.pitch = 0.8;
+      u.rate = 1;
+      if (selectedVoice) u.voice = selectedVoice;
+      speechSynthesis.speak(u);
+    }
+  </script>
 
 </body>
-</html>
 
+</html>
