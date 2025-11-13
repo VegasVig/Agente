@@ -62,6 +62,7 @@
       background: #111;
       color: #fff;
       cursor: pointer;
+      transition: background 0.2s;
     }
 
     .mic-btn {
@@ -72,6 +73,12 @@
       display: grid;
       place-items: center;
       font-size: 22px;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .mic-btn.active {
+      background: linear-gradient(180deg, #00e676, #00c853);
+      box-shadow: 0 0 12px 3px rgba(0, 230, 118, 0.6);
     }
 
     .answer-box {
@@ -129,7 +136,7 @@ const answerBox = document.getElementById("answerBox");
 // Inicializa o vídeo
 document.getElementById("bgVideo").play().catch(()=>{});
 
-// ✅ Som de clique para ativar áudio no iPhone
+// ✅ Som inicial (ativa áudio no iPhone)
 document.body.addEventListener("click", () => {
   document.getElementById("audioVegas").play().catch(()=>{});
 }, { once:true });
@@ -144,29 +151,32 @@ if (SpeechRecognition) {
     questionInput.value = text;
     submit(text);
   };
+  rec.onstart = () => {
+    micStatus.textContent = "Ouvindo...";
+    micToggle.classList.add("active");
+  };
+  rec.onend = () => {
+    micStatus.textContent = "Falar";
+    micToggle.classList.remove("active");
+  };
   micToggle.onclick = () => rec.start();
-  rec.onstart = ()=> micStatus.textContent = "Ouvindo...";
-  rec.onend = ()=> micStatus.textContent = "Falar";
+} else {
+  micToggle.disabled = true;
+  micStatus.textContent = "Sem microfone";
 }
 
-// ✅ Chamada correta ao Dify
+// ✅ Chamada ao agente do n8n
 async function getAnswer(q) {
-  const r = await fetch("https://api.dify.ai/v1/chat-messages", {
+  const r = await fetch("https://andrecruzac.app.n8n.cloud/chat/ikZQYjixrxmxhSZnf", { // ← substitua pela URL do seu Chat Trigger
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer app-nyz9LEtNHRzsugzCRS67Dj2h"
+      "Content-Type": "application/json"
     },
-    body: JSON.stringify({
-      query: q,
-      inputs: {},
-      response_mode: "blocking",
-      user: "vegon-user"
-    })
+    body: JSON.stringify({ message: q })
   });
 
   const data = await r.json();
-  return data.answer || "⚠ Não consegui responder.";
+  return data.output || data.answer || "⚠ Não consegui responder.";
 }
 
 // 📩 Enviar pergunta
@@ -180,28 +190,32 @@ async function submit(text) {
 
 askBtn.onclick = () => submit(questionInput.value);
 
-// 🧔 Voz masculina
+// 🧔 Forçar voz masculina (pt-BR)
 let selectedVoice = null;
+
 function pickVoice() {
   const voices = speechSynthesis.getVoices();
-  selectedVoice = voices.find(v => v.lang.includes("pt") && (
-    v.name.includes("Ricardo") || v.name.includes("Daniel") || v.name.includes("Male")
-  )) || voices[0];
+
+  selectedVoice =
+    voices.find(v => v.lang === "pt-BR" && v.name.includes("Ricardo")) ||
+    voices.find(v => v.lang === "pt-BR" && v.name.includes("Daniel")) ||
+    voices.find(v => v.lang === "pt-BR" && v.name.toLowerCase().includes("male")) ||
+    voices.find(v => v.lang === "pt-BR") ||
+    voices.find(v => v.lang.includes("pt")) ||
+    voices[0];
 }
-speechSynthesis.onvoiceschanged = pickVoice; pickVoice();
+
+speechSynthesis.onvoiceschanged = pickVoice;
+pickVoice();
 
 function speak(text) {
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "pt-BR";
-  u.pitch = 0.7;
+  u.pitch = 0.8;
+  u.rate = 1;
   if (selectedVoice) u.voice = selectedVoice;
   speechSynthesis.speak(u);
 }
-
-// 🎬 Mensagem de boas-vindas
-document.body.addEventListener("click",()=>{
-  speak("Olá instalador, eu sou o Vegon. Como posso te ajudar hoje?");
-},{once:true});
 </script>
 
 </body>
