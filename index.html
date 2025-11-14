@@ -7,8 +7,7 @@
   <title>Agente Vegas Vegon</title>
 
   <style>
-    html,
-    body {
+    html, body {
       height: 100%;
       margin: 0;
       font-family: Inter, system-ui, Arial;
@@ -85,13 +84,8 @@
     }
 
     @keyframes pulse {
-      0% {
-        transform: scale(1);
-      }
-
-      100% {
-        transform: scale(1.1);
-      }
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
     }
 
     .answer-box {
@@ -170,40 +164,41 @@
       micToggle.onclick = () => rec.start();
     }
 
-    // ✅ Chamada ao seu agente n8n
+    // ============================================================
+    // 🔥 FUNÇÃO CORRIGIDA — AGORA FUNCIONA EM PC E CELULAR
+    // ============================================================
     async function getAnswer(q) {
       try {
-        const r = await fetch("https://andrecruzac.app.n8n.cloud/webhook/technical-support", { 
+        const r = await fetch("https://andrecruzac.app.n8n.cloud/webhook/technical-support", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q })
-
-
+          body: JSON.stringify({ question: q })
         });
 
-        const data = await r.json();
+        const data = await r.text();  // 🔥 IMPORTANTE: texto puro!
         console.log("🔹Resposta do n8n:", data);
-        return data;
+
+        return data;  // 🔥 não tenta transformar em JSON
       } catch (err) {
         console.error(err);
         return "❌ Erro ao conectar com o agente.";
       }
     }
 
+    // ============================================================
+    // 🔥 SUBMIT — MOSTRA E FALA A RESPOSTA
+    // ============================================================
     async function submit(text) {
-  if (!text.trim()) return;
-  answerBox.innerHTML = "<i>Pensando...</i>";
-  const ans = await getAnswer(text);
+      if (!text.trim()) return;
 
-  // Renderiza HTML vindo do n8n
-  answerBox.innerHTML = ans;
+      answerBox.innerHTML = "<i>Pensando...</i>";
 
-  // Remove tags HTML antes de falar
-  const spoken = ans.replace(/<[^>]+>/g, "");
-  speak(spoken);
-}
+      const ans = await getAnswer(text);
 
-    
+      answerBox.innerHTML = ans;              // Exibe a resposta
+      const spoken = ans.replace(/<[^>]+>/g, ""); // Remove HTML antes de falar
+      speak(spoken);
+    }
 
     askBtn.onclick = () => submit(questionInput.value);
 
