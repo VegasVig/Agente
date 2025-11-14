@@ -191,12 +191,19 @@
     }
 
     async function submit(text) {
-      if (!text.trim()) return;
-      answerBox.textContent = "Pensando...";
-      const ans = await getAnswer(text);
-      answerBox.textContent = ans;
-      speak(ans);
-    }
+  if (!text.trim()) return;
+  answerBox.innerHTML = "<i>Pensando...</i>";
+  const ans = await getAnswer(text);
+
+  // Renderiza HTML vindo do n8n
+  answerBox.innerHTML = ans;
+
+  // Remove tags HTML antes de falar
+  const spoken = ans.replace(/<[^>]+>/g, "");
+  speak(spoken);
+}
+
+    
 
     askBtn.onclick = () => submit(questionInput.value);
 
