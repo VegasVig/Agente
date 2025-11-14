@@ -183,7 +183,7 @@
 
         const data = await r.json();
         console.log("🔹Resposta do n8n:", data);
-        return data.answer || data.output || data.text || data.mensagem || "⚠ Não consegui entender.";
+        return data.answer || data.output || data.text || data.mensagem ;
       } catch (err) {
         console.error(err);
         return "❌ Erro ao conectar com o agente.";
