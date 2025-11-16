@@ -169,7 +169,7 @@
     // ============================================================
     async function getAnswer(q) {
       try {
-        const r = await fetch("https://andrecruzac.app.n8n.cloud/webhook-test/technical-support", {
+        const r = await fetch("https://andrecruzac.app.n8n.cloud/webhook/technical-support", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question: q })
