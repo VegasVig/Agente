@@ -4,10 +4,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Agente Vegas Vegon</title>
+  <title>Agent-Vegon</title>
 
   <style>
-    html, body {
+    html,
+    body {
       height: 100%;
       margin: 0;
       font-family: Inter, system-ui, Arial;
@@ -84,8 +85,13 @@
     }
 
     @keyframes pulse {
-      0% { transform: scale(1); }
-      100% { transform: scale(1.1); }
+      0% {
+        transform: scale(1);
+      }
+
+      100% {
+        transform: scale(1.1);
+      }
     }
 
     .answer-box {
@@ -164,16 +170,15 @@
       micToggle.onclick = () => rec.start();
     }
 
-    // ============================================================
-    // 🔥 FUNÇÃO CORRIGIDA — AGORA FUNCIONA EM PC E CELULAR
-    // ============================================================
+
     async function getAnswer(q) {
       try {
-        const r = await fetch("https://andrecruzac.app.n8n.cloud/webhook/technical-support", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question: q })
-        });
+        const r = await fetch("http://localhost:5678/webhook/tecinical-support",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: q })
+          });
 
         const data = await r.text();  // 🔥 IMPORTANTE: texto puro!
         console.log("🔹Resposta do n8n:", data);
