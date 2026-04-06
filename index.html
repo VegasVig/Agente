@@ -173,26 +173,24 @@
 
     async function getAnswer(q) {
       try {
-        const r = await fetch("https://vegon2.app.n8n.cloud/webhook/technical-support",
+        const r = await fetch("https://vegon3.app.n8n.cloud/webhook/technical-support",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ question: q })
           });
 
-        const data = await r.text();  // 🔥 IMPORTANTE: texto puro!
+        const data = await r.text(); 
         console.log("🔹Resposta do n8n:", data);
 
-        return data;  // 🔥 não tenta transformar em JSON
+        return data; 
       } catch (err) {
         console.error(err);
         return "❌ Erro ao conectar com o agente.";
       }
     }
 
-    // ============================================================
-    // 🔥 SUBMIT — MOSTRA E FALA A RESPOSTA
-    // ============================================================
+   
     async function submit(text) {
       if (!text.trim()) return;
 
