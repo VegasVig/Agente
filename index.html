@@ -85,13 +85,8 @@
     }
 
     @keyframes pulse {
-      0% {
-        transform: scale(1);
-      }
-
-      100% {
-        transform: scale(1.1);
-      }
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
     }
 
     .answer-box {
@@ -112,7 +107,8 @@
 
 <body>
 
-  <video class="bg-video" id="bgVideo" preload="auto" playsinline loop muted>
+  <!-- vídeo parado até falar -->
+  <video class="bg-video" id="bgVideo" preload="auto" playsinline muted>
     <source src="./assets/VEGON2PRO.mp4" type="video/mp4">
   </video>
 
@@ -143,10 +139,10 @@
     const questionInput = document.getElementById("questionInput");
     const askBtn = document.getElementById("askBtn");
     const answerBox = document.getElementById("answerBox");
+    const bgVideo = document.getElementById("bgVideo");
 
-    document.getElementById("bgVideo").play().catch(() => { });
     document.body.addEventListener("click", () => {
-      document.getElementById("audioVegas").play().catch(() => { });
+      document.getElementById("audioVegas").play().catch(() => {});
     }, { once: true });
 
     // 🎤 Reconhecimento de voz
@@ -154,43 +150,44 @@
     if (SpeechRecognition) {
       const rec = new SpeechRecognition();
       rec.lang = "pt-BR";
+
       rec.onresult = e => {
         const text = e.results[0][0].transcript;
         questionInput.value = text;
         submit(text);
       };
+
       rec.onstart = () => {
         micStatus.textContent = "Ouvindo...";
         micToggle.classList.add("active");
       };
+
       rec.onend = () => {
         micStatus.textContent = "Falar";
         micToggle.classList.remove("active");
       };
+
       micToggle.onclick = () => rec.start();
     }
 
-
     async function getAnswer(q) {
       try {
-        const r = await fetch("https://vegon4.app.n8n.cloud/webhook/technical-support",
-          {                    
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question: q })
-          });
+        const r = await fetch("https://vegon4.app.n8n.cloud/webhook/technical-support", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question: q })
+        });
 
-        const data = await r.text(); 
+        const data = await r.text();
         console.log("🔹Resposta do n8n:", data);
 
-        return data; 
+        return data;
       } catch (err) {
         console.error(err);
         return "❌ Erro ao conectar com o agente.";
       }
     }
 
-   
     async function submit(text) {
       if (!text.trim()) return;
 
@@ -198,8 +195,8 @@
 
       const ans = await getAnswer(text);
 
-      answerBox.innerHTML = ans;              // Exibe a resposta
-      const spoken = ans.replace(/<[^>]+>/g, ""); // Remove HTML antes de falar
+      answerBox.innerHTML = ans;
+      const spoken = ans.replace(/<[^>]+>/g, "");
       speak(spoken);
     }
 
@@ -223,15 +220,30 @@
     pickVoice();
 
     function speak(text) {
+      speechSynthesis.cancel();
+
       const u = new SpeechSynthesisUtterance(text);
       u.lang = "pt-BR";
       u.pitch = 0.8;
       u.rate = 1;
+
       if (selectedVoice) u.voice = selectedVoice;
+
+      // inicia vídeo quando falar
+      u.onstart = () => {
+        bgVideo.currentTime = 0;
+        bgVideo.play().catch(() => {});
+      };
+
+      // pausa vídeo quando terminar
+      u.onend = () => {
+        bgVideo.pause();
+        bgVideo.currentTime = 0;
+      };
+
       speechSynthesis.speak(u);
     }
   </script>
 
 </body>
-
 </html>
